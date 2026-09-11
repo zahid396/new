@@ -12,6 +12,12 @@ RUN npm run build
 # ---- Final FrankenPHP image ----
 FROM dunglas/frankenphp:1-php8.5
 
+# The image ships the frankenphp binary with cap_net_bind_service file
+# capabilities (needed to bind privileged ports like 80/443). Render does not
+# allow this, which makes the binary fail to exec with "Operation not
+# permitted". We bind to an unprivileged port, so strip the capabilities.
+RUN setcap -r /usr/local/bin/frankenphp
+
 # Install Composer plus the required PHP extensions (including MySQL)
 RUN install-php-extensions \
     @composer \
