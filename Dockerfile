@@ -30,11 +30,19 @@ COPY . /app
 # Copy the freshly built frontend assets
 COPY --from=assets /src/public/build /app/public/build
 
+# Create Laravel's writable runtime directories (storage/* is gitignored, so the
+# image would otherwise be missing storage/logs, framework/views, etc.)
+RUN mkdir -p \
+        storage/app/public \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 # Install production dependencies via Composer
 RUN composer install --no-dev --optimize-autoloader
-
-# Make storage writable
-RUN chmod -R 775 storage bootstrap/cache
 
 # Expose the Render HTTP port (default 10000)
 EXPOSE 10000
